@@ -1,23 +1,68 @@
 package ibf2022.batch2.ssf.frontcontroller.services;
 
+import java.net.http.HttpHeaders;
+import java.util.Collections;
+
+import javax.naming.AuthenticationException;
+
+import org.apache.tomcat.util.http.parser.MediaType;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+@Service
 public class AuthenticationService {
 
-	// TODO: Task 2
-	// DO NOT CHANGE THE METHOD'S SIGNATURE
-	// Write the authentication method in here
-	public void authenticate(String username, String password) throws Exception {
-	}
+    private static int failedLoginAttempts = 0;
 
-	// TODO: Task 3
-	// DO NOT CHANGE THE METHOD'S SIGNATURE
-	// Write an implementation to disable a user account for 30 mins
-	public void disableUser(String username) {
-	}
+    
+    public static void authenticate(String username, String password) throws AuthenticationException {
+        String authUrl = "https://auth.chuklee.com/api/authenticate";
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders(null);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        AuthRequest authRequest = new AuthRequest(username, password);
+        HttpEntity<AuthRequest> requestEntity = new HttpEntity<>(authRequest, headers);
 
-	// TODO: Task 5
-	// DO NOT CHANGE THE METHOD'S SIGNATURE
-	// Write an implementation to check if a given user's login has been disabled
+        try {
+            ResponseEntity<AuthResponse> responseEntity = restTemplate.exchange(authUrl, HttpMethod.POST, requestEntity, AuthResponse.class);
+            if (responseEntity.getStatusCode() != HttpStatus.CREATED) {
+                throw new AuthenticationException("Authentication failed with status code " + responseEntity.getStatusCodeValue());
+            }
+            System.out.println(responseEntity.getBody().getMessage());
+            failedLoginAttempts = 0;
+        } catch (HttpClientErrorException e) {
+            failedLoginAttempts++;
+            if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                throw new AuthenticationException("Invalid payload");
+            } else if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                throw new AuthenticationException("Incorrect username and/or password");
+            } else {
+                throw new AuthenticationException("Authentication failed with status code " + e.getStatusCode().value());
+            }
+        } catch (RestClientException e) {
+            failedLoginAttempts++;
+            throw new AuthenticationException("Failed to authenticate with authentication server");
+        }
+    }
+
+    public int getFailedLoginAttempts() {
+        return failedLoginAttempts;
+    }
+	
 	public boolean isLocked(String username) {
-		return false;
-	}
+        Authentication authentication = ((Object) SecurityContextHolder.getContext()).getAuthentication();
+        return authentication != null && authentication.isLocked();
+    }
 }
+
+
+
+	

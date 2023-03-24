@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-	TODO: Task 1, Task 2, Task 3
+	TODO: Task 1 (done), Task 2(done), Task 3 (done)
 -->
 <html lang="en">
 	<head>
@@ -10,7 +10,8 @@
 	</head>
 	<body>
 
-		<h2>Please Login</h2>
+		<h2>Login Page</h2>
+		<form method="post" action="/authenticate">
 
 		<table>
 			<tr>
@@ -18,8 +19,8 @@
 					<label for="username">Username:</label> 
 				</td>
 				<td>
-					<input type="text" id="username" size="30" 
-							placeholder="Please type in your username" >
+					<input type="text" id="username" name="username" size="30" 
+							placeholder="Enter username" required minlength="2">
 				</td>
 			</tr>
 			<tr>
@@ -27,17 +28,26 @@
 					<label for="password">Password:</label>
 				</td>
 				<td>
-					<input type="password" id="password" size="30" 
-							placeholder="Please type in your password">
+					<input type="password" id="password" name="password"  size="30" 
+							placeholder="Enter password" required minlength="2">
 				</td>
 			</tr>
 			<tr>
-				<td></td>
 				<td>
-					<button>Login</button>
+					<label for="answer">Answer:</label>
+				</td>
+				<td>
+					<span th:text="${num1}"></span>
+					<span th:text="${op}"></span>
+					<span th:text="${num2}"></span>
+					<input type="text" id="answer" name="answer" size="10" required>
+				</td>
+				<td>
+					<button type="submit">Login</button>
 				</td>
 			</tr>
 		</table>
-		
+		<p th:if="${error}" style="color: red;">[[${error}]]</p>
+		</form>
 	</body>
 </html>

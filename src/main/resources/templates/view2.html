@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Account Disabled</title>
+</head>
+<body>
+    <h1>Account Disabled</h1>
+    <p>Your account is disabled for 30 minutes due to multiple failed login attempts.</p>
+    <p>Account: {{ disabledUsername }}</p>
+    <p>Please wait until {{ disabledUntil | date:'yyyy-MM-dd HH:mm:ss' }} to try again, or <a href="/">return to login</a>.</p>
+</body>
+</html>
